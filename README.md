@@ -25,7 +25,7 @@ Uma aplicação fullstack simples para extrair (scrape) listagens de produtos da
 ### 🔁 Clonando o repositório
 
 ```bash
-git clone https://github.com/rodrigodiasz/amazon-scraper.git
+git clone https://github.com/rodrigodiasz/Junior-Full-Stack-Developer.git
 cd amazon-scraper
 ```
 
