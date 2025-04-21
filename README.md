@@ -26,7 +26,7 @@ Uma aplicação fullstack simples para extrair (scrape) listagens de produtos da
 
 ```bash
 git clone https://github.com/rodrigodiasz/Junior-Full-Stack-Developer.git
-cd amazon-scraper
+cd Junior-Full-Stack-Developer
 ```
 
 ### 🧪 1. Configurar o Backend (Bun)
@@ -48,6 +48,7 @@ REQUEST_TIMEOUT=7000
 #### ▶️ Rodando o servidor:
 
 ```bash
+cd backend
 bun run src/server.js
 ```
 
