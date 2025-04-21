@@ -31,7 +31,7 @@ btn.addEventListener("click", async () => {
       results.innerHTML =
         "<h2>Resultados</h2><p>Nenhum produto encontrado.</p>";
     } else {
-      results.innerHTML = `<h2>Resultados (${validProducts.length})</h2>`;
+      results.innerHTML = `<div><h2>Resultados (${validProducts.length})</h2></div>`
       results.innerHTML += validProducts
         .map(
           (p) => `
