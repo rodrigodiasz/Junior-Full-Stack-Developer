@@ -133,27 +133,33 @@ async function searchProducts(keyword) {
   }
 }
 
-const debouncedSearch = debounce((keyword) => {
-  searchProducts(keyword);
-}, 800);
-
 keywordInput.addEventListener("input", (e) => {
   const keyword = e.target.value.trim();
-  if (keyword.length >= 2) {
-    debouncedSearch(keyword);
-  } else if (keyword.length === 0) {
-    results.innerHTML = ""; 
+  if (keyword.length === 0) {
+    results.innerHTML = "";
   }
 });
 
+const debouncedButtonClick = debounce((keyword) => {
+  searchProducts(keyword);
+}, 800);
+
 btn.addEventListener("click", () => {
   const keyword = keywordInput.value.trim();
-  searchProducts(keyword);
+  if (keyword.length >= 2) {
+    debouncedButtonClick(keyword);
+  } else {
+    showError("Digite pelo menos 2 caracteres para buscar.");
+  }
 });
 
 keywordInput.addEventListener("keypress", (e) => {
   if (e.key === "Enter") {
     const keyword = keywordInput.value.trim();
-    searchProducts(keyword);
+    if (keyword.length >= 2) {
+      debouncedButtonClick(keyword);
+    } else {
+      showError("Digite pelo menos 2 caracteres para buscar.");
+    }
   }
 });
