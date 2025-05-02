@@ -1,56 +1,159 @@
 const btn = document.getElementById("scrapeBtn");
 const results = document.getElementById("results");
-
-//Utilizando variaveis de ambiente para uma melhor segurança no código
+const keywordInput = document.getElementById("keyword");
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
-btn.addEventListener("click", async () => {
-  const keywordInput = document.getElementById("keyword");
-  const keyword = keywordInput.value.trim();
-  //Valida se tem ao digitado no campo de pesquisa
-  if (!keyword) {
-    results.innerHTML = "<p>Digite uma palavra‑chave.</p>";
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+function showError(message) {
+  results.innerHTML = `
+    <div class="error">
+      <h2>Erro</h2>
+      <p>${message}</p>
+    </div>
+  `;
+}
+
+function showLoading() {
+  btn.disabled = true;
+  keywordInput.disabled = true;
+  btn.innerHTML = '<span class="loading"></span> Buscando...';
+  results.innerHTML = `
+    <div class="search-text">
+      <h2>Resultados</h2>
+      <p>Buscando produtos, por favor aguarde...</p>
+    </div>
+  `;
+}
+
+function resetButton() {
+  btn.disabled = false;
+  keywordInput.disabled = false;
+  btn.innerHTML = "Buscar";
+}
+
+function renderProducts(data) {
+  if (!data.products || data.products.length === 0) {
+    results.innerHTML = `
+      <div class="no-results">
+        <h2>Nenhum produto encontrado</h2>
+        <p>Tente uma palavra-chave diferente.</p>
+      </div>
+    `;
     return;
   }
 
-  results.innerHTML =
-    '<div class="search-text"><h2>Resultados</h2><p>Carregando...</p></div>';
-
-  try {
-     //consome a api e faz a busca do item baseado na (keyword) digitada
-    const res = await fetch(
-      `${API_BASE}/api/scrape?keyword=${encodeURIComponent(keyword)}`
-    );
-    if (!res.ok) throw new Error("Resposta do servidor não OK");
-
-    const { products } = await res.json();
-    const validProducts = products.filter((p) => p.title && p.imageUrl);
-
-    //Valida se tem produtos e devolve uma lista com os produtos
-    if (validProducts.length === 0) {
-      results.innerHTML =
-        "<h2>Resultados</h2><p>Nenhum produto encontrado.</p>";
-    } else {
-      results.innerHTML = `<div><h2>Resultados (${validProducts.length})</h2></div>`
-      results.innerHTML += validProducts
+  results.innerHTML = `
+    <div class="results-header">
+      <h2>Resultados (${data.count})</h2>
+    </div>
+    <div class="products-grid">
+      ${data.products
         .map(
-          (p) => `
+          (product) => `
         <div class="product">
-          <img src="${p.imageUrl}" alt="${p.title}">
-          <div class="info">
-            <h3>${p.title}</h3>
-            <p>Avaliação: ${p.rating ?? "—"} estrelas (${
-            p.reviewCount ?? 0
-          } avaliações)</p>
+          <div class="product-image">
+            <img src="${product.imageUrl}" alt="${
+            product.title
+          }" loading="lazy">
+          </div>
+          <div class="product-info">
+            <h3>${product.title}</h3>
+            <p class="product-price">${product.price}</p>
+            ${
+              product.rating
+                ? `
+              <div class="product-rating">
+                <span class="stars">${"⭐".repeat(
+                  Math.round(parseFloat(product.rating))
+                )}</span>
+                <span class="rating-text">${product.rating} (${
+                    product.reviewCount
+                  } avaliações)</span>
+              </div>
+            `
+                : ""
+            }
+            <a href="${
+              product.link
+            }" target="_blank" rel="noopener noreferrer" class="product-link">
+              Ver na Amazon
+            </a>
           </div>
         </div>
       `
         )
-        .join("");
+        .join("")}
+    </div>
+  `;
+}
+
+async function searchProducts(keyword) {
+  if (!keyword) {
+    showError("Digite uma palavra-chave para buscar.");
+    return;
+  }
+
+  if (keyword.length < 2) {
+    showError("Digite pelo menos 2 caracteres para buscar.");
+    return;
+  }
+
+  showLoading();
+
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/scrape?keyword=${encodeURIComponent(keyword)}`
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || data.message || "Erro ao buscar produtos");
     }
-    //Tratamento de erro
+
+    renderProducts(data);
   } catch (err) {
-    console.error(err);
-    results.innerHTML = "<h2>Resultados</h2><p>Erro ao buscar produtos.</p>";
+    console.error("Erro:", err);
+    showError(
+      err.message || "Erro ao buscar produtos. Tente novamente mais tarde."
+    );
+  } finally {
+    resetButton();
+  }
+}
+
+const debouncedSearch = debounce((keyword) => {
+  searchProducts(keyword);
+}, 800);
+
+keywordInput.addEventListener("input", (e) => {
+  const keyword = e.target.value.trim();
+  if (keyword.length >= 2) {
+    debouncedSearch(keyword);
+  } else if (keyword.length === 0) {
+    results.innerHTML = ""; 
+  }
+});
+
+btn.addEventListener("click", () => {
+  const keyword = keywordInput.value.trim();
+  searchProducts(keyword);
+});
+
+keywordInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    const keyword = keywordInput.value.trim();
+    searchProducts(keyword);
   }
 });

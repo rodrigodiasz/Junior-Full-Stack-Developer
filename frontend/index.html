@@ -1,16 +1,23 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Amazon Scraper</title>
-  <link rel="stylesheet" href="src/style.css">
+  <link rel="stylesheet" href="/src/style.css">
 </head>
+
 <body>
-  <div class="search">
-    <input id="keyword" placeholder="Digite a palavra‑chave">
-    <button id="scrapeBtn">Pesquisar</button>
+  <div class="container">
+    <h1>Amazon Scraper</h1>
+    <div class="search-container">
+      <input type="text" id="keyword" placeholder="Digite uma palavra-chave..." />
+      <button id="scrapeBtn">Buscar</button>
+    </div>
+    <div id="results"></div>
   </div>
-  <div id="results"></div>
-  <script type="module" src="./src/main.js"></script>
+  <script type="module" src="/src/main.js"></script>
 </body>
+
 </html>
