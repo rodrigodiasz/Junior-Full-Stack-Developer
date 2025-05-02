@@ -144,10 +144,6 @@ keywordInput.addEventListener("input", (e) => {
   }
 });
 
-const debouncedButtonClick = debounce((keyword) => {
-  searchProducts(keyword);
-}, 800);
-
 btn.addEventListener("click", () => {
   const keyword = keywordInput.value.trim();
   if (keyword.length >= 2) {
