@@ -3,15 +3,19 @@ const results = document.getElementById("results");
 const keywordInput = document.getElementById("keyword");
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
+let isSearching = false;
+
 function debounce(func, wait) {
   let timeout;
   return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
+    if (isSearching) {
+      return;
+    }
+    isSearching = true;
+    func(...args);
+    setTimeout(() => {
+      isSearching = false;
+    }, wait);
   };
 }
 
@@ -147,7 +151,7 @@ const debouncedButtonClick = debounce((keyword) => {
 btn.addEventListener("click", () => {
   const keyword = keywordInput.value.trim();
   if (keyword.length >= 2) {
-    debouncedButtonClick(keyword);
+    searchProducts(keyword);
   } else {
     showError("Digite pelo menos 2 caracteres para buscar.");
   }
@@ -157,7 +161,7 @@ keywordInput.addEventListener("keypress", (e) => {
   if (e.key === "Enter") {
     const keyword = keywordInput.value.trim();
     if (keyword.length >= 2) {
-      debouncedButtonClick(keyword);
+      searchProducts(keyword);
     } else {
       showError("Digite pelo menos 2 caracteres para buscar.");
     }
